@@ -449,9 +449,16 @@ prefersDark.addEventListener('change', (event)=>{
   }
 });
 
+function stripMarkdownEmphasis(value){
+  if(typeof value !== 'string') return '';
+  return value
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1');
+}
+
 function formatResponse(text){
   const fragment = document.createDocumentFragment();
-  const cleaned = (text || '').trim();
+  const cleaned = stripMarkdownEmphasis((text || '').trim());
   if(!cleaned){
     fragment.append(document.createTextNode('(No response)'));
     return fragment;
@@ -472,53 +479,44 @@ function formatResponse(text){
 
   const addParagraph = (textContent)=>{
     const paragraph = document.createElement('p');
-    paragraph.textContent = textContent;
+    paragraph.textContent = stripMarkdownEmphasis(textContent);
     fragment.append(paragraph);
   };
 
-  const createList = (tag, items)=>{
-    const list = document.createElement(tag);
-    items.forEach(item => {
-      const li = document.createElement('li');
-      li.textContent = item;
-      list.append(li);
-    });
-    fragment.append(list);
-  };
-
   normalizedBlocks.forEach((block, index) => {
-    const lines = block
+    const rawLines = block
       .split('\n')
       .map(line => line.replace(/\s+/g, ' ').trim())
       .filter(Boolean);
 
-    if(!lines.length){
+    if(!rawLines.length){
       return;
     }
 
-    const bulletMatches = lines.map(line => line.match(/^[-*•]\s+(.*)$/));
+    const bulletMatches = rawLines.map(line => line.match(/^[-*•]\s+(.*)$/));
     if(bulletMatches.every(match => !!match)){
-      const items = bulletMatches
+      bulletMatches
         .map(match => match[1].trim())
-        .filter(Boolean);
-      if(items.length){
-        createList('ul', items);
-        return;
-      }
+        .filter(Boolean)
+        .forEach(item => addParagraph(item));
+      return;
     }
 
-    const numberMatches = lines.map(line => line.match(/^\d+[.)]\s+(.*)$/));
+    const numberMatches = rawLines.map(line => line.match(/^(\d+)[.)]\s+(.*)$/));
     if(numberMatches.every(match => !!match)){
-      const items = numberMatches
-        .map(match => match[1].trim())
-        .filter(Boolean);
-      if(items.length){
-        createList('ol', items);
-        return;
-      }
+      numberMatches
+        .map(match => ({index: match[1], text: match[2].trim()}))
+        .filter(item => item.text)
+        .forEach((item, i) => addParagraph(`${item.index || i + 1}. ${item.text}`.trim()));
+      return;
     }
 
-    const combined = lines.join(' ').replace(/\s+/g, ' ').trim();
+    const sanitizedLines = rawLines.map(line => {
+      const withoutBullets = line.replace(/^[-*•]\s+/, '');
+      return stripMarkdownEmphasis(withoutBullets);
+    });
+
+    const combined = sanitizedLines.join(' ').replace(/\s+/g, ' ').trim();
     if(!combined){
       return;
     }
@@ -527,7 +525,7 @@ function formatResponse(text){
       const sentenceMatch = combined.match(/[^.!?]+[.!?]?/);
       if(sentenceMatch && sentenceMatch[0].length < combined.length){
         const heading = document.createElement('h3');
-        heading.textContent = sentenceMatch[0].trim();
+        heading.textContent = stripMarkdownEmphasis(sentenceMatch[0].trim());
         fragment.append(heading);
         const remainder = combined.slice(sentenceMatch[0].length).trim();
         if(remainder){
@@ -542,7 +540,7 @@ function formatResponse(text){
 
   if(fragment.children.length === 0){
     const fallback = document.createElement('p');
-    fallback.textContent = cleaned;
+    fallback.textContent = stripMarkdownEmphasis(cleaned);
     fragment.append(fallback);
   }
 
