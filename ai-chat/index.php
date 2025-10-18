@@ -140,11 +140,12 @@
     form{
       margin-top:auto;
       display:flex;
-      gap:12px;
+      gap:10px;
       position:sticky;
       bottom:0;
       padding-top:8px;
       background:linear-gradient(180deg,rgba(19,23,34,0),rgba(19,23,34,0.92) 70%);
+      align-items:stretch;
     }
     input,button,textarea{font:inherit;color:inherit}
     .input-wrap{
@@ -152,39 +153,98 @@
       position:relative;
       display:flex;
       align-items:center;
-      background:rgba(10,13,19,0.65);
-      border:1px solid var(--border);
+      padding:10px 18px;
       border-radius:calc(var(--radius) - 4px);
-      padding:8px 14px;
+      border:1px solid transparent;
+      background:
+        linear-gradient(rgba(10,13,19,0.78), rgba(10,13,19,0.78)) padding-box,
+        linear-gradient(135deg, rgba(58,192,160,0.6), rgba(74,227,188,0.9), rgba(58,192,160,0.6)) border-box;
+      background-size:100% 100%, 220% 220%;
+      animation:borderFlow 6s ease-in-out infinite;
+      box-shadow:0 12px 36px rgba(8,12,20,0.45);
+      transition:box-shadow 0.35s ease, transform 0.35s ease;
+      overflow:hidden;
+    }
+    .input-wrap::after{
+      content:"";
+      position:absolute;
+      inset:-6px;
+      border-radius:inherit;
+      background:radial-gradient(circle at 20% 20%, rgba(74,227,188,0.18), transparent 60%),
+                 radial-gradient(circle at 80% 80%, rgba(58,192,160,0.14), transparent 55%);
+      opacity:0.55;
+      pointer-events:none;
+      animation:borderPulse 4.5s ease-in-out infinite;
+    }
+    @keyframes borderFlow{
+      0%{background-position:0 0, 0% 50%;}
+      50%{background-position:0 0, 100% 50%;}
+      100%{background-position:0 0, 0% 50%;}
+    }
+    @keyframes borderPulse{
+      0%{opacity:0.35;transform:scale(0.98)}
+      50%{opacity:0.75;transform:scale(1.02)}
+      100%{opacity:0.35;transform:scale(0.98)}
+    }
+    .input-wrap:focus-within{
+      box-shadow:0 16px 38px rgba(15,25,34,0.65), 0 0 0 2px rgba(74,227,188,0.35);
+      transform:translateY(-1px);
     }
     textarea{
       flex:1;
       border:0;
       background:transparent;
       resize:vertical;
-      min-height:48px;
-      max-height:160px;
+      min-height:40px;
+      max-height:140px;
       padding:0;
       color:var(--fg);
+      line-height:1.45;
+      width:100%;
     }
     textarea:focus{outline:none}
     button{
-      width:44px;
-      height:44px;
-      border-radius:50%;
       border:0;
-      display:inline-flex;
+      display:flex;
       align-items:center;
       justify-content:center;
+      min-width:52px;
+      padding:0 18px;
+      border-radius:calc(var(--radius) - 4px);
       background:linear-gradient(135deg,var(--accent),var(--accent-strong));
       color:#041015;
       cursor:pointer;
       box-shadow:0 8px 20px rgba(58,192,160,0.35);
       transition:transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      height:100%;
     }
-    button svg{width:20px;height:20px;fill:currentColor}
+    button svg{width:18px;height:18px;fill:currentColor}
     button:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(58,192,160,0.45)}
     button:active{transform:translateY(0)}
+    .bubble.bot.bot-formatted{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .bubble.bot h3{
+      margin:0 0 12px;
+      font-size:18px;
+      font-weight:600;
+      color:var(--accent-strong);
+      letter-spacing:0.01em;
+    }
+    .bubble.bot p{
+      margin:0 0 12px;
+      color:var(--fg);
+    }
+    .bubble.bot ul{
+      margin:0 0 12px 18px;
+      padding:0 0 0 12px;
+      display:grid;
+      gap:6px;
+    }
+    .bubble.bot li{line-height:1.5}
+    .bubble.bot > *:last-child{margin-bottom:0}
     @media (max-width:768px){
       header{padding:24px 16px 8px}
       .wrap{padding:24px 18px 18px}
@@ -218,7 +278,7 @@
     </div>
     <button type="submit" class="send-btn" aria-label="Send message">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M4.26 3.3c-.95-.4-1.88.5-1.58 1.45l2.12 6.77c.07.21.22.38.42.47l5.19 2.48c.3.14.3.57 0 .71l-5.19 2.48c-.2.1-.35.27-.42.47l-2.12 6.77c-.3.95.63 1.85 1.58 1.45l16.88-7.2c1.02-.44 1.02-1.87 0-2.31L4.26 3.3Z"/>
+        <path d="M3.72 20.78c-.7.28-1.38-.38-1.19-1.09l2.03-7.48L2.53 4.7c-.19-.71.51-1.34 1.2-1.06l18 7.36c.92.38.92 1.7 0 2.08l-18 7.36ZM6.2 13.18l-.86 3.2 10.02-4.61L5.34 7.16l.86 3.2h8.52c.37 0 .62.39.46.72-.42.88-1.32 2.1-2.6 2.1H6.2Z"/>
       </svg>
     </button>
   </form>
@@ -230,18 +290,95 @@ const log = document.getElementById('log');
 const form = document.getElementById('f');
 const q = document.getElementById('q');
 
-function typeText(el, text){
-  let index = 0;
-  const speed = 16;
-  function step(){
-    if(index < text.length){
-      el.textContent += text[index];
-      index++;
-      const delay = text[index - 1] === '.' ? 90 : text[index - 1] === ',' ? 70 : speed;
-      setTimeout(step, delay);
+function formatResponse(text){
+  const fragment = document.createDocumentFragment();
+  const cleaned = (text || '').trim();
+  if(!cleaned){
+    fragment.append(document.createTextNode('(No response)'));
+    return fragment;
+  }
+
+  const lines = cleaned.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  if(!lines.length){
+    fragment.append(document.createTextNode(cleaned));
+    return fragment;
+  }
+
+  let headingLine = lines.shift();
+  let headingCandidate = headingLine.replace(/^#+\s*/, '');
+  if(headingCandidate.split(' ').length > 12){
+    const headingSentences = headingCandidate.match(/[^.!?]+[.!?]?/g) || [headingCandidate];
+    headingCandidate = headingSentences.shift().trim();
+    const remainder = headingSentences.join(' ').trim();
+    if(remainder){
+      lines.unshift(remainder);
     }
   }
-  step();
+
+  if(!headingCandidate){
+    headingCandidate = 'Response';
+  }
+
+  const heading = document.createElement('h3');
+  heading.textContent = headingCandidate;
+  fragment.append(heading);
+
+  const bulletItems = [];
+  const paragraphSentences = [];
+
+  lines.forEach(line => {
+    if(/^[-*•]/.test(line)){
+      bulletItems.push(line.replace(/^[-*•]\s*/, ''));
+      return;
+    }
+
+    const sentences = (line.match(/[^.!?]+[.!?]?/g) || [line]).map(sentence => sentence.trim()).filter(Boolean);
+    if(sentences.length > 1){
+      bulletItems.push(sentences.shift());
+    }
+    paragraphSentences.push(...sentences);
+  });
+
+  if(!bulletItems.length && paragraphSentences.length){
+    bulletItems.push(paragraphSentences.shift());
+  }
+
+  if(!bulletItems.length){
+    bulletItems.push(`Key takeaway: ${headingCandidate}`);
+  }
+
+  const list = document.createElement('ul');
+  bulletItems.forEach(itemText => {
+    if(!itemText) return;
+    const li = document.createElement('li');
+    li.textContent = itemText;
+    list.append(li);
+  });
+  if(list.childElementCount){
+    fragment.append(list);
+  }
+
+  if(paragraphSentences.length){
+    let buffer = [];
+    paragraphSentences.forEach(sentence => {
+      if(!sentence) return;
+      buffer.push(sentence);
+      const currentText = buffer.join(' ');
+      if(currentText.length >= 140 || buffer.length >= 2){
+        const paragraph = document.createElement('p');
+        paragraph.textContent = currentText;
+        fragment.append(paragraph);
+        buffer = [];
+      }
+    });
+    if(buffer.length){
+      const paragraph = document.createElement('p');
+      paragraph.textContent = buffer.join(' ');
+      fragment.append(paragraph);
+    }
+  }
+
+  return fragment;
 }
 
 function add(role, text, {loading=false} = {}){
@@ -251,7 +388,8 @@ function add(role, text, {loading=false} = {}){
   const div = document.createElement('div'); div.className = 'bubble ' + (role==='user'?'user':'bot');
   if(role === 'assistant' && !loading){
     div.textContent = '';
-    requestAnimationFrame(()=>typeText(div, text));
+    div.classList.add('bot-formatted');
+    div.append(formatResponse(text));
   }else{
     div.textContent = text;
   }
@@ -280,7 +418,8 @@ form.addEventListener('submit', async (e)=>{
     const data = await r.json();
     loadingBubble.textContent = '';
     loadingBubble.classList.remove('user');
-    typeText(loadingBubble, (data.reply || '(No response)'));
+    loadingBubble.classList.add('bot-formatted');
+    loadingBubble.append(formatResponse(data.reply || '(No response)'));
   }catch(err){
     loadingBubble.textContent = 'Error: ' + err.message;
   }
