@@ -34,7 +34,19 @@ $endpoint = sprintf(
   urlencode(GEMINI_API_KEY)
 );
 
+$kbPath = __DIR__ . '/sombokchab.docx';
+$kbContent = '';
+if (is_readable($kbPath)) {
+  $kbContent = trim(file_get_contents($kbPath));
+}
+
+$systemPrompt = "You are the official Sombokchab virtual assistant. Use only the knowledge base provided to answer any questions about the Sombokchab platform, shopping process, payment methods, delivery, policies, or customer support. If the knowledge base does not contain the requested information, clearly state that the information is unavailable. Do not invent or guess details about Sombokchab. When replying about Sombokchab, respond in clean paragraph style without any markdown symbols, bullet characters, bold, or italics. For topics unrelated to Sombokchab, answer normally using your general knowledge while still avoiding markdown formatting. Knowledge base follows:\n\n" . $kbContent;
+
 $payload = [
+  'systemInstruction' => [
+    'role' => 'system',
+    'parts' => [['text' => $systemPrompt]],
+  ],
   'contents' => [[
     'role' => 'user',
     'parts' => [['text' => $prompt]]
