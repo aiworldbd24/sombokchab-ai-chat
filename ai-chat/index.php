@@ -6,7 +6,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Sombokchab — AI Chat (Gemini)</title>
+  <title>Sombokchab — AI Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root{
@@ -44,7 +44,7 @@
 <header>
   <div class="wrap brand">
     <span class="dot"></span>
-    <h1>Sombokchab — AI Chat (Gemini)</h1>
+    <h1>Sombokchab — AI Chat</h1>
     <span class="badge">Beta</span>
   </div>
 </header>
@@ -53,7 +53,7 @@
   <section class="hero">
     <div>
       <h2>Ask anything</h2>
-      <p>General questions, buying help, delivery info, simple translations — powered by Google Gemini.</p>
+      <p>General questions, buying help, delivery info, simple translations — powered by our AI assistant.</p>
     </div>
   </section>
 
@@ -64,7 +64,8 @@
     <button type="submit">Send</button>
   </form>
 
-  <p class="tip">Private: your question is sent securely to our server, then to Google Gemini. No keys in the browser.</p>
+  <p class="tip">Private: your question is sent securely to our server, then to our AI service. No keys in the browser.</p>
+  <p class="tip">It's made by Shimanto.</p>
 </div>
 
 <script>
