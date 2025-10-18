@@ -72,6 +72,7 @@
     .shell{padding:28px 18px 60px;display:flex;justify-content:center}
     h1{margin:0;font-size:18px;letter-spacing:0.08em;text-transform:uppercase}
     .brand{display:flex;align-items:center;gap:12px}
+    .brand img{height:46px;width:auto;display:block}
     .brand .dot{width:12px;height:12px;border-radius:50%;background:var(--brand);box-shadow:0 0 12px rgba(0,245,255,0.9)}
     .chat{display:flex;flex-direction:column;gap:16px;margin-top:20px}
     .bubble{
@@ -162,6 +163,7 @@
 <body>
 <header>
   <div class="wrap brand">
+    <img src="https://sombokchab.com/assets/uploads/media-uploader/sombok-jab-final-logo-061737325403.png" alt="Sombokchab logo">
     <span class="dot"></span>
     <h1>Sombokchab — AI Chat</h1>
   </div>
