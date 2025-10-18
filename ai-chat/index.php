@@ -6,7 +6,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Sombokchab — AI Chat (Gemini)</title>
+  <title>Sombokchab — AI Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root{
@@ -97,10 +97,10 @@
       position:absolute;
       inset:-2px;
       border-radius:20px;
-      background:linear-gradient(130deg,rgba(0,245,255,0.6),rgba(188,45,255,0.5),rgba(0,245,255,0.6));
-      opacity:0.8;
-      filter:blur(6px);
-      animation:glow 6s linear infinite;
+      background:linear-gradient(120deg,rgba(0,245,255,0.75),rgba(111,92,255,0.55),rgba(0,245,255,0.75));
+      opacity:0.9;
+      filter:blur(9px);
+      animation:aurora 9s ease-in-out infinite;
       z-index:0;
     }
     textarea{
@@ -119,46 +119,35 @@
       box-shadow:inset 0 0 0 1px rgba(255,255,255,0.04);
     }
     textarea:focus{outline:none;box-shadow:0 0 0 2px rgba(0,245,255,0.6)}
-    .orbit{
-      position:absolute;
-      top:50%;
-      right:-26px;
-      width:18px;
-      height:18px;
-      border:2px solid rgba(0,245,255,0.6);
-      border-radius:50%;
-      transform:translateY(-50%);
-      animation:orbit 3.6s linear infinite;
-      filter:drop-shadow(0 0 8px rgba(0,245,255,0.6));
-    }
     button{
-      padding:14px 22px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:14px 24px;
       border:0;
       border-radius:18px;
-      background:linear-gradient(135deg,rgba(0,245,255,0.75),rgba(0,157,255,0.55));
+      background:linear-gradient(135deg,rgba(0,245,255,0.85),rgba(0,157,255,0.65));
       color:#020611;
       font-weight:700;
       cursor:pointer;
       letter-spacing:0.04em;
-      box-shadow:0 12px 30px rgba(0,245,255,0.35);
-      transition:transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow:0 18px 34px rgba(0,245,255,0.35);
+      transition:transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
     }
-    button:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,245,255,0.45)}
+    button svg{width:20px;height:20px;display:block;filter:drop-shadow(0 0 4px rgba(0,0,0,0.35))}
+    button span{display:block}
+    .send-btn span:first-child{display:flex;align-items:center}
+    .send-btn span:last-child{font-size:15px;text-transform:uppercase;letter-spacing:0.08em}
+    button:hover{transform:translateY(-2px);box-shadow:0 22px 38px rgba(0,245,255,0.45);background:linear-gradient(135deg,rgba(0,245,255,0.95),rgba(0,157,255,0.75))}
     button:active{transform:translateY(0)}
-    .tip{color:var(--muted);font-size:12px;margin-top:14px;text-align:center}
-    .badge{display:inline-block;padding:4px 12px;border-radius:999px;background:var(--chip);color:var(--fg);font-size:12px;backdrop-filter:blur(16px);border:1px solid var(--glass-border)}
     .hero{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 0 6px}
     .hero h2{margin:0 0 10px 0;font-size:28px;letter-spacing:0.03em}
     .hero p{margin:0;color:var(--muted);max-width:420px}
-    @keyframes glow{
-      0%{transform:rotate(0deg)}
-      50%{transform:rotate(180deg)}
-      100%{transform:rotate(360deg)}
-    }
-    @keyframes orbit{
-      0%{transform:translateY(-50%) rotate(0deg) translateX(0)}
-      50%{transform:translateY(-50%) rotate(180deg) translateX(0)}
-      100%{transform:translateY(-50%) rotate(360deg) translateX(0)}
+    @keyframes aurora{
+      0%{transform:rotate(0deg) scale(1);opacity:0.85}
+      35%{transform:rotate(140deg) scale(1.05);opacity:1}
+      70%{transform:rotate(260deg) scale(1);opacity:0.88}
+      100%{transform:rotate(360deg) scale(1.03);opacity:0.95}
     }
     @media (max-width:768px){
       .wrap{padding:20px}
@@ -166,7 +155,6 @@
       .bubble{max-width:92%}
       form{flex-direction:column}
       .input-wrap{width:100%}
-      .orbit{display:none}
       button{width:100%}
     }
   </style>
@@ -175,8 +163,7 @@
 <header>
   <div class="wrap brand">
     <span class="dot"></span>
-    <h1>Sombokchab — AI Chat (Gemini)</h1>
-    <span class="badge">Beta</span>
+    <h1>Sombokchab — AI Chat</h1>
   </div>
 </header>
 
@@ -185,7 +172,7 @@
   <section class="hero">
     <div>
       <h2>Ask anything</h2>
-      <p>General questions, buying help, delivery info, simple translations — powered by Google Gemini.</p>
+      <p>General questions, buying help, delivery info, simple translations — powered by Shimanto.</p>
     </div>
   </section>
 
@@ -193,13 +180,18 @@
 
   <form id="f">
     <div class="input-wrap">
-      <textarea id="q" placeholder="Type your question… (e.g., “What is cash on delivery?”)" required></textarea>
-      <span class="orbit" aria-hidden="true"></span>
+      <textarea id="q" placeholder="Ask Shimanto for product guidance, delivery updates, or translations." required></textarea>
     </div>
-    <button type="submit">Send</button>
+    <button type="submit" class="send-btn">
+      <span aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3.2 11.1c-.9-.4-.9-1.8.1-2.1l16.3-6.3c1-.4 2 0 2.4 1s0 2.1-.9 2.5L14 10.8c-.3.1-.3.5 0 .6l7.3 4.2c.9.5 1.2 1.6.7 2.5-.5.9-1.6 1.2-2.5.7l-16.4-9.1Z" fill="#020611"/>
+          <path d="M8.9 13.2c-.2-.1-.4.1-.3.3l1.2 5.6c.2.9-.6 1.7-1.5 1.5-.6-.1-1.1-.6-1.2-1.1l-1.8-9.3c-.1-.5.2-1 .7-1.2l9.3-3.8c.9-.4 1.8.5 1.5 1.5l-1.5 4.7c-.1.3-.5.3-.6.1L13 10c-.1-.1-.3-.1-.4 0l-3.7 3.2Z" fill="#00f5ff"/>
+        </svg>
+      </span>
+      <span>Send</span>
+    </button>
   </form>
-
-  <p class="tip">Private: your question is sent securely to our server, then to Google Gemini. No keys in the browser.</p>
 </div>
 </div>
 
@@ -210,7 +202,7 @@ const q = document.getElementById('q');
 
 function typeText(el, text){
   let index = 0;
-  const speed = 18;
+  const speed = 16;
   function step(){
     if(index < text.length){
       el.textContent += text[index];
@@ -242,6 +234,7 @@ form.addEventListener('submit', async (e)=>{
   const prompt = q.value.trim();
   if(!prompt) return;
   q.value = '';
+  q.focus();
   add('user', prompt);
   const loadingBubble = add('assistant', 'Thinking…', {loading:true});
 
@@ -258,6 +251,17 @@ form.addEventListener('submit', async (e)=>{
     typeText(loadingBubble, (data.reply || '(No response)'));
   }catch(err){
     loadingBubble.textContent = 'Error: ' + err.message;
+  }
+});
+
+q.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    if(typeof form.requestSubmit === 'function'){
+      form.requestSubmit();
+    }else{
+      form.dispatchEvent(new Event('submit', {cancelable:true}));
+    }
   }
 });
 </script>
