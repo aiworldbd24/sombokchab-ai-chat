@@ -270,6 +270,17 @@
     .bubble.bot.bot-formatted p{
       margin:0;
     }
+    .bubble.bot.bot-formatted ul,
+    .bubble.bot.bot-formatted ol{
+      margin:0;
+      padding-left:22px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .bubble.bot.bot-formatted li{
+      margin:0;
+    }
     form{
       margin-top:auto;
       display:flex;
@@ -446,44 +457,87 @@ function formatResponse(text){
     return fragment;
   }
 
-  const sections = cleaned
+  const normalizedBlocks = cleaned
     .replace(/\r\n/g, '\n')
     .split(/\n{2,}/)
-    .map(section => section
-      .split('\n')
-      .map(line => line.replace(/^\s*[-*•]\s*/, '').trim())
-      .filter(Boolean)
-      .join(' '))
-    .map(section => section.replace(/\s+/g, ' ').trim())
+    .map(block => block.trim())
     .filter(Boolean);
 
-  if(!sections.length){
+  if(!normalizedBlocks.length){
     const paragraph = document.createElement('p');
     paragraph.textContent = cleaned.replace(/\s+/g, ' ');
     fragment.append(paragraph);
     return fragment;
   }
 
-  if(sections.length > 1){
-    const headingText = (()=>{
-      const first = sections.shift();
-      const sentenceMatch = first.match(/[^.!?]+[.!?]?/);
-      if(sentenceMatch && sentenceMatch[0].length < first.length){
-        sections.unshift(first.slice(sentenceMatch[0].length).trim());
-        return sentenceMatch[0].trim();
-      }
-      return first;
-    })();
-    const heading = document.createElement('h3');
-    heading.textContent = headingText;
-    fragment.append(heading);
-  }
-
-  sections.forEach(section => {
-    if(!section) return;
+  const addParagraph = (textContent)=>{
     const paragraph = document.createElement('p');
-    paragraph.textContent = section;
+    paragraph.textContent = textContent;
     fragment.append(paragraph);
+  };
+
+  const createList = (tag, items)=>{
+    const list = document.createElement(tag);
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      list.append(li);
+    });
+    fragment.append(list);
+  };
+
+  normalizedBlocks.forEach((block, index) => {
+    const lines = block
+      .split('\n')
+      .map(line => line.replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+
+    if(!lines.length){
+      return;
+    }
+
+    const bulletMatches = lines.map(line => line.match(/^[-*•]\s+(.*)$/));
+    if(bulletMatches.every(match => !!match)){
+      const items = bulletMatches
+        .map(match => match[1].trim())
+        .filter(Boolean);
+      if(items.length){
+        createList('ul', items);
+        return;
+      }
+    }
+
+    const numberMatches = lines.map(line => line.match(/^\d+[.)]\s+(.*)$/));
+    if(numberMatches.every(match => !!match)){
+      const items = numberMatches
+        .map(match => match[1].trim())
+        .filter(Boolean);
+      if(items.length){
+        createList('ol', items);
+        return;
+      }
+    }
+
+    const combined = lines.join(' ').replace(/\s+/g, ' ').trim();
+    if(!combined){
+      return;
+    }
+
+    if(index === 0 && normalizedBlocks.length > 1){
+      const sentenceMatch = combined.match(/[^.!?]+[.!?]?/);
+      if(sentenceMatch && sentenceMatch[0].length < combined.length){
+        const heading = document.createElement('h3');
+        heading.textContent = sentenceMatch[0].trim();
+        fragment.append(heading);
+        const remainder = combined.slice(sentenceMatch[0].length).trim();
+        if(remainder){
+          addParagraph(remainder);
+        }
+        return;
+      }
+    }
+
+    addParagraph(combined);
   });
 
   if(fragment.children.length === 0){
