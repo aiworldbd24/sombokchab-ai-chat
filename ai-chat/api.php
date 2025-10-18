@@ -15,6 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $raw = file_get_contents('php://input');
 $data = json_decode($raw, true);
 
+if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+  http_response_code(400);
+  echo json_encode(['error' => 'Invalid JSON payload']);
+  exit;
+}
+
 $prompt = trim($data['prompt'] ?? '');
 if ($prompt === '' || mb_strlen($prompt) > 8000) {
   http_response_code(400);
